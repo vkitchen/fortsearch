@@ -3,5 +3,6 @@ vgcore.*
 postings.dat
 wsj.xml
 *.mod
+*.o
 index
 search

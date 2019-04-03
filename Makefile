@@ -1,10 +1,12 @@
 
 SRC := \
-	file.f90
+	file.f90 \
+	string.f90 \
+	parser.f90
 
-OBJECTS := $(SRC:%.f90=%.mod)
+OBJECTS := $(SRC:%.f90=%.o)
 
-%.mod: %.f90
+%.o: %.f90
 	gfortran -c $< -o $@
 
 all: index
