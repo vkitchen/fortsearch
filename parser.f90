@@ -17,6 +17,7 @@ type parser
 	integer :: index
 contains
 	procedure :: initialize
+	procedure :: advance
 	procedure :: next
 end type parser
 
@@ -30,25 +31,73 @@ subroutine initialize(p, str)
 	p%index = 1
 end subroutine initialize
 
-subroutine next(p)
+subroutine advance(p)
 	class(parser) :: p
 
-	logical :: t
+	integer :: length
+	length = len(p%str)
 
-	print *, p%index
-	print *, p%str(:7)
-	t = prefix("cat", "catacomb")
-	print *, t
-	t = prefix("catd", "catacomb")
-	print *, t
-	t = prefix("catcat", "cat")
-	print *, t
-	t = prefix("", "cat")
-	print *, t
-	t = isspace(' ')
-	print *, t
-	t = isspace('c')
-	print *, t
-end subroutine next
+	do
+		if (p%index == length) then
+			return
+		end if
+
+		do while (p%index < length .AND. isspace(p%str(p%index:p%index)))
+			p%index = p%index + 1
+		end do
+
+		if (prefix("<DOCNO>", p%str(p%index:))) then
+			return
+		else if (p%str(p%index:p%index) == '<') then
+			p%index = p%index + index(p%str(p%index:), '>')
+		else
+			return
+		end if
+			
+			
+	end do
+end subroutine advance
+
+function next(p) result(out)
+	class(parser) :: p
+	type(token) :: out
+
+	integer :: length
+	integer :: slice
+
+	length = len(p%str)
+
+	call p%advance()
+
+	if (p%index == length) then
+		out%what = end
+		return
+	end if
+
+	if (prefix("<DOCNO>", p%str(p%index:))) then
+		p%index = p%index + len("<DOCNO>")
+
+		call p%advance()
+
+		slice = index(p%str(p%index:), "</DOCNO>")
+
+		out%what = docno
+		out%value = trim(p%str(p%index:p%index+slice-2))
+
+		p%index = p%index + slice-1 + len("</DOCNO>")
+		return
+	end if
+
+	slice = 0
+	do while (p%index+slice < length .AND. .NOT. isspace(p%str(p%index+slice:p%index+slice)))
+		slice = slice + 1
+	end do
+
+	out%what = word
+	out%value = p%str(p%index:p%index+slice-1)
+
+	p%index = p%index + slice
+
+end function next
 
 end module parser_mod
