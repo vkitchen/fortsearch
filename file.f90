@@ -1,4 +1,4 @@
-module file
+module file_mod
 implicit none
 
 contains
@@ -14,4 +14,4 @@ contains
 		read(10) file
 		close(10)
 	end function
-end module file
+end module file_mod

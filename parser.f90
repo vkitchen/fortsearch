@@ -95,6 +95,8 @@ function next(p) result(out)
 
 	out%what = word
 	out%value = p%str(p%index:p%index+slice-1)
+	out%value = clean(out%value)
+	call lowercase(out%value)
 
 	p%index = p%index + slice
 

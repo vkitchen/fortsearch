@@ -1,33 +1,36 @@
 program index
-use file
+use file_mod
 use parser_mod
+use bst_mod
 implicit none
 	
 	character(len=:), allocatable :: document_collection
 	type(parser) :: prs
 	type(token) :: tok
-	integer :: i
+	type(bst) :: postings
+	integer :: docid
 
 	document_collection = file_slurp("wsj.xml")
 
 	call prs%initialize(document_collection)
+	call postings%initialize()
 
-	do i = 1, 10
+	tok%what = word
+	docid = 0
+	do while (tok%what /= end)
 		tok = prs%next()
 
 		select case (tok%what)
 			case (docno)
-				print *, "*DOCNO*"
-				print *, tok%value
+				docid = docid + 1
 			case (word)
-				print *, "*WORD*"
-				print *, tok%value
-				print *, len(tok%value)
-			case (end)
-				print *, "*END*"
-			case default
-				print *, "*UNKNOWN*"
+				if (len(tok%value) == 0) then
+					cycle
+				end if
+				call postings%insert(tok%value, docid)
 		end select
 	end do
+
+	call postings%print()
 
 end program index
