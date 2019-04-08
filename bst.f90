@@ -16,9 +16,10 @@ contains
 	procedure :: insert
 	procedure :: find
 	procedure :: print
+	procedure :: write
 end type bst
 
-private :: initialize, insert, find, print
+private :: initialize, insert, find, print, write
 
 contains
 
@@ -44,19 +45,23 @@ subroutine insert(tree, key, docid)
 	p => tree%root
 
 	do
+!print *, "a"
 		if (key < p%key) then
+!print *, "b"
 			if (.NOT. associated(p%left)) then
 				call make_node(p%left, key, docid)
 				return
 			end if
 			p => p%left
 		else if (key > p%key) then
+!print *, "b"
 			if (.NOT. associated(p%right)) then
 				call make_node(p%right, key, docid)
 				return
 			end if
 			p => p%right
 		else
+!print *, "b"
 			call p%post%append(docid)
 			tree%size = tree%size - 1
 			return
@@ -98,5 +103,33 @@ recursive subroutine print_inorder(node)
 	call node%post%print()
 	call print_inorder(node%right)
 end subroutine print_inorder
+
+subroutine write(tree)
+	class(bst) :: tree
+	write(10) tree%size
+	call write_key_inorder(tree%root)
+	call write_post_inorder(tree%root)
+end subroutine write
+
+recursive subroutine write_key_inorder(node)
+	type(bst_node), pointer :: node
+	if (.NOT. associated(node)) then
+		return
+	end if
+	call write_key_inorder(node%left)
+	write(10) len(node%key)
+	write(10) node%key
+	call write_key_inorder(node%right)
+end subroutine write_key_inorder
+
+recursive subroutine write_post_inorder(node)
+	type(bst_node), pointer :: node
+	if (.NOT. associated(node)) then
+		return
+	end if
+	call write_post_inorder(node%left)
+	call node%post%write()
+	call write_post_inorder(node%right)
+end subroutine write_post_inorder
 
 end module bst_mod

@@ -8,9 +8,11 @@ contains
 	procedure :: initialize
 	procedure :: append
 	procedure :: print
+	procedure :: write
+	procedure :: read
 end type posting
 
-private :: initialize, append, print
+private :: initialize, append, print, write, read
 
 contains
 
@@ -38,5 +40,19 @@ subroutine print(p)
 	call p%id_store%print()
 	call p%count_store%print()
 end subroutine print
+
+subroutine write(p)
+	class(posting) :: p
+
+	call p%id_store%write()
+	call p%count_store%write()
+end subroutine write
+
+subroutine read(p)
+	class(posting) :: p
+
+	call p%id_store%read()
+	call p%count_store%read()
+end subroutine read
 
 end module posting_mod

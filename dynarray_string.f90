@@ -1,40 +1,40 @@
-module dynarray_mod
+module dynarray_string_mod
 implicit none
 
-type dynarray
+type dynarray_string
 	integer :: capacity, length
-	integer, allocatable :: store(:)
+	character(len=14), allocatable :: store(:)
 contains
 	procedure :: initialize
 	procedure :: append
 	procedure :: last
-	procedure :: increment_last
 	procedure :: print
 	procedure :: write
 	procedure :: read
-end type dynarray
+end type dynarray_string
 
-private :: initialize, append, last, increment_last, print, write, read
+private :: initialize, append, last, print, write, read
 
 contains
 
 subroutine initialize(a)
-	class(dynarray) :: a
+	class(dynarray_string) :: a
+
 	a%length = 0
 	a%capacity = 128
-	allocate(a%store(a%capacity))
+	allocate(character(14) :: a%store(a%capacity))
 end subroutine initialize
 
 subroutine append(a, val)
-	class(dynarray) :: a
-	integer, intent(in) :: val
+	class(dynarray_string) :: a
+	character(len=*), intent(in) :: val
 
-	integer, allocatable :: buf(:)
+	character(len=:), allocatable :: buf(:)
 
 	if (a%length == a%capacity) then
 		call move_alloc(a%store, buf)
 		a%capacity = a%capacity * 2
-		allocate(a%store(a%capacity))
+		allocate(character(14) :: a%store(a%capacity))
 		a%store(1:a%length) = buf
 		deallocate(buf)
 	end if
@@ -43,43 +43,37 @@ subroutine append(a, val)
 end subroutine append
 
 function last(a) result(out)
-	class(dynarray) :: a
-	integer :: out
+	class(dynarray_string) :: a
+	character(len=:), allocatable :: out
 
 	out = a%store(a%length)
 end function last
 
-subroutine increment_last(a)
-	class(dynarray) :: a
-
-	a%store(a%length) = a%store(a%length) + 1
-end subroutine increment_last
-
 subroutine print(a)
-	class(dynarray) :: a
+	class(dynarray_string) :: a
 
 	integer :: i
 
 	do i = 1, a%length
-		write(*, fmt="(I8)", advance="no") a%store(i)
+		print *, a%store(i)
 	end do
 	print *, ''
 end subroutine print
 
 subroutine write(a)
-	class(dynarray) :: a
+	class(dynarray_string) :: a
 
 	write(10) a%length
 	write(10) a%store(:a%length)
 end subroutine write
 
 subroutine read(a)
-	class(dynarray) :: a
+	class(dynarray_string) :: a
 
 	read(10) a%length
 	a%capacity = a%length
-	allocate(a%store(a%capacity))
+	allocate(character(14) :: a%store(a%capacity))
 	read(10) a%store
 end subroutine read
 
-end module dynarray_mod
+end module dynarray_string_mod
