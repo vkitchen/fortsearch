@@ -67,11 +67,18 @@ contains
 	function binary_search(dictionary, key) result(out)
 		character(len=*), intent(in) :: dictionary(:)
 		character(len=*), intent(in) :: key
-		integer :: out
+		integer :: low, mid, high, out
 
-		do i = 1, size(dictionary) + 1
-			if (dictionary(i) == key) then
-				out = i
+		low = 0
+		high = size(dictionary) - 1
+		do while (low <= high)
+			mid = (low + high) / 2
+			if (key < dictionary(mid+1)) then
+				high = mid - 1
+			else if (key > dictionary(mid+1)) then
+				low = mid + 1
+			else
+				out = mid+1
 				return
 			end if
 		end do
