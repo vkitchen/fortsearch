@@ -20,6 +20,7 @@ implicit none
 	integer :: i, numrecs, recsize, result
 
 	character(len=1024) :: query
+	type(posting) :: results_list
 
 	open(unit=10, file="postings.dat", action="read", access="stream")
 	call docnos%read()
@@ -44,10 +45,10 @@ implicit none
 
 ! END READ
 
-	print *, size(dictionary)
+!	print *, size(dictionary)
 
 	read "(A)", query
-	print *, "*******"
+!	print *, "*******"
 	call prs%initialize(query)
 	tok%what = word
 	do while (tok%what /= end)
@@ -55,12 +56,18 @@ implicit none
 
 		select case (tok%what)
 			case (word)
-				print *, tok%value
+!				print *, tok%value
 				result = binary_search(dictionary, tok%value)
-				print *, result
+				if (result == -1) then
+					call results_list%set_length(0)
+					exit
+				end if
+				results_list = results_list%merge_with(postings(result)%ptr)
 		end select
 	end do
-	print *, "*******"
+!	print *, "*******"
+	call results_list%sort()
+	call results_list%results_print(docnos)
 
 contains
 

@@ -6,15 +6,17 @@ type dynarray
 	integer, allocatable :: store(:)
 contains
 	procedure :: initialize
+	procedure :: initialize_length
 	procedure :: append
 	procedure :: last
 	procedure :: increment_last
 	procedure :: print
 	procedure :: write
 	procedure :: read
+	procedure :: set_length
 end type dynarray
 
-private :: initialize, append, last, increment_last, print, write, read
+private :: initialize, initialize_length, append, last, increment_last, print, write, read, set_length
 
 contains
 
@@ -24,6 +26,14 @@ subroutine initialize(a)
 	a%capacity = 128
 	allocate(a%store(a%capacity))
 end subroutine initialize
+
+subroutine initialize_length(a, length)
+	class(dynarray) :: a
+	integer :: length
+	a%length = 0
+	a%capacity = length
+	allocate(a%store(a%capacity))
+end subroutine initialize_length
 
 subroutine append(a, val)
 	class(dynarray) :: a
@@ -81,5 +91,12 @@ subroutine read(a)
 	allocate(a%store(a%capacity))
 	read(10) a%store
 end subroutine read
+
+subroutine set_length(a, length)
+	class(dynarray) :: a
+	integer :: length
+
+	a%length = min(a%length, length)
+end subroutine set_length
 
 end module dynarray_mod
