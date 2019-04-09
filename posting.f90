@@ -137,21 +137,49 @@ end function merge_with
 subroutine sort(p)
 	class(posting) :: p
 
-	integer :: i, j, id_temp
-	real(REAL64) :: rsv_temp
-	do i = 2, p%id_store%length
-		id_temp = p%id_store%store(i)
-		rsv_temp = p%rsv_store(i)
-		j = i - 1
-		do while (j >= 1 .AND. p%rsv_store(j) < rsv_temp)
-			p%id_store%store(j+1) = p%id_store%store(j)
-			p%rsv_store(j+1) = p%rsv_store(j)
-			j = j - 1
-		end do
-		p%id_store%store(j+1) = id_temp
-		p%rsv_store(j+1) = rsv_temp
-	end do
+	call quicksort(p, 1, p%id_store%length)
 end subroutine sort
+
+recursive subroutine quicksort(p, lo, hi)
+	class(posting) :: p
+	integer, intent(in) :: lo, hi
+
+	integer :: left, right, id_tmp
+	real(REAL64) :: pivot, rsv_tmp
+
+	if (.NOT. lo < hi) then
+		return
+	end if
+
+	pivot = p%rsv_store((lo + hi) / 2)
+	left = lo - 1
+	right = hi + 1
+	do
+		left = left + 1
+		do while (p%rsv_store(left) > pivot)
+			left = left + 1
+		end do
+		right = right - 1
+		do while (p%rsv_store(right) < pivot)
+			right = right - 1
+		end do
+
+		if (left >= right) then
+			exit
+		end if
+
+		rsv_tmp = p%rsv_store(left)
+		p%rsv_store(left) = p%rsv_store(right)
+		p%rsv_store(right) = rsv_tmp
+
+		id_tmp = p%id_store%store(left)
+		p%id_store%store(left) = p%id_store%store(right)
+		p%id_store%store(right) = id_tmp
+	end do
+
+	call quicksort(p, lo, right)
+	call quicksort(p, right + 1, hi)
+end subroutine quicksort
 
 subroutine results_print(p, docnos)
 	class(posting) :: p
