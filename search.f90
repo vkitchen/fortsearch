@@ -62,6 +62,7 @@ implicit none
 					call results_list%set_length(0)
 					exit
 				end if
+				call postings(result)%ptr%compute_rsv(docnos%length)
 				results_list = results_list%merge_with(postings(result)%ptr)
 		end select
 	end do

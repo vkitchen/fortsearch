@@ -1,10 +1,12 @@
 module posting_mod
+use, intrinsic :: iso_fortran_env
 use dynarray_mod
 use dynarray_string_mod
 implicit none
 
 type posting
 	type(dynarray) :: id_store, count_store
+	real(REAL64), allocatable :: rsv_store(:)
 contains
 	procedure :: initialize
 	procedure :: initialize_length
@@ -12,13 +14,14 @@ contains
 	procedure :: print
 	procedure :: write
 	procedure :: read
+	procedure :: compute_rsv
 	procedure :: set_length
 	procedure :: merge_with
 	procedure :: sort
 	procedure :: results_print
 end type posting
 
-private :: initialize, initialize_length, append, print, write, read, set_length, merge_with, sort, results_print
+private :: initialize, initialize_length, append, print, write, read, compute_rsv, set_length, merge_with, sort, results_print
 
 contains
 
@@ -68,6 +71,26 @@ subroutine read(p)
 	call p%count_store%read()
 end subroutine read
 
+subroutine compute_rsv(p, count)
+	class(posting) :: p
+	integer, intent(in) :: count
+
+	integer :: i
+	real(REAL64) :: length, doccount
+
+	if (allocated(p%rsv_store)) then
+		return
+	end if
+
+	length = p%count_store%length
+	doccount = count
+	allocate(p%rsv_store(p%count_store%length))
+
+	do i = 1, p%count_store%length
+		p%rsv_store(i) = p%count_store%store(i) / (length / doccount)
+	end do
+end subroutine compute_rsv
+
 subroutine set_length(p, length)
 	class(posting) :: p
 	integer :: length
@@ -89,6 +112,7 @@ function merge_with(p, with) result(out)
 
 	size = max(p%id_store%length, with%id_store%length)
 	call out%initialize_length(size)
+	allocate(out%rsv_store(size))
 
 	left = 1
 	right = 1
@@ -101,8 +125,7 @@ function merge_with(p, with) result(out)
 			out%id_store%length = out%id_store%length + 1
 			out%id_store%store(out%id_store%length) = p%id_store%store(left)
 
-			out%count_store%length = out%count_store%length + 1
-			out%count_store%store(out%count_store%length) = p%count_store%store(left) + with%count_store%store(right)
+			out%rsv_store(out%id_store%length) = p%rsv_store(left) + with%rsv_store(right)
 
 			left = left + 1
 			right = right + 1
@@ -114,18 +137,19 @@ end function merge_with
 subroutine sort(p)
 	class(posting) :: p
 
-	integer :: i, j, id_temp, count_temp
+	integer :: i, j, id_temp
+	real(REAL64) :: rsv_temp
 	do i = 2, p%id_store%length
 		id_temp = p%id_store%store(i)
-		count_temp = p%count_store%store(i)
+		rsv_temp = p%rsv_store(i)
 		j = i - 1
-		do while (j >= 1 .AND. p%count_store%store(j) < count_temp)
+		do while (j >= 1 .AND. p%rsv_store(j) < rsv_temp)
 			p%id_store%store(j+1) = p%id_store%store(j)
-			p%count_store%store(j+1) = p%count_store%store(j)
+			p%rsv_store(j+1) = p%rsv_store(j)
 			j = j - 1
 		end do
 		p%id_store%store(j+1) = id_temp
-		p%count_store%store(j+1) = count_temp
+		p%rsv_store(j+1) = rsv_temp
 	end do
 end subroutine sort
 
@@ -136,7 +160,7 @@ subroutine results_print(p, docnos)
 	integer :: i
 
 	do i = 1, p%id_store%length
-		print *, docnos%store(p%id_store%store(i)), p%count_store%store(i)
+		print "(A,F10.2)", docnos%store(p%id_store%store(i)), p%rsv_store(i)
 	end do
 end subroutine results_print
 
