@@ -14,12 +14,11 @@ type bst
 contains
 	procedure :: initialize
 	procedure :: insert
-	procedure :: find
 	procedure :: print
 	procedure :: write
 end type bst
 
-private :: initialize, insert, find, print, write
+private :: initialize, insert, print, write
 
 contains
 
@@ -82,11 +81,6 @@ subroutine make_node(node, key, docid)
 	call node%post%initialize()
 	call node%post%append(docid)
 end subroutine make_node
-
-function find(tree) result(out)
-	class(bst) :: tree
-	type(bst_node) :: out
-end function find
 
 subroutine print(tree)
 	class(bst) :: tree
