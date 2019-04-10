@@ -1,5 +1,5 @@
 
-GFLAGS := -Wall -Wextra -Wno-tabs -g
+GFLAGS := -Wall -Wextra -Wno-tabs -O3 -g
 
 SRC := \
 	file.f90 \
@@ -11,6 +11,7 @@ SRC := \
 	bst.f90
 
 OBJECTS := $(SRC:%.f90=%.o)
+MODULES := $(SRC:%.f90=%_mod.mod)
 
 %.o: %.f90
 	gfortran $(GFLAGS) -c $< -o $@
@@ -23,7 +24,7 @@ index: index.f90 $(OBJECTS)
 search: search.f90 $(OBJECTS)
 	gfortran $(GFLAGS) -o $@ search.f90 $(OBJECTS)
 
-CLEAN := $(OBJECTS) index
+CLEAN := $(OBJECTS) $(MODULES) index search
 clean:
 	rm -f $(CLEAN)
 
